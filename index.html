@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
   <meta charset="UTF-8" />
   <title>Monte o Computador</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -36,13 +39,17 @@
     }
 
     .container {
-      display: flex;
-      flex-direction: row;
-      flex-wrap: wrap;
-      justify-content: center;
-      padding: 20px;
-      gap: 20px;
-    }
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: flex-start; /* novo: garante alinhamento ao topo */
+  padding: 20px;
+  gap: 20px;
+  max-width: 1200px; /* novo: evita expandir demais em telas grandes */
+  margin: 0 auto;
+}
+
 
     @media (max-width: 768px) {
       .container {
@@ -102,11 +109,14 @@
     .slot.cooler { top: 70px; left: 10px; width: 30px; height: 30px; background-color: rgba(255,255,255,0.05); }
 
     .components {
-      display: flex;
-      flex-direction: column;
-      flex-wrap: nowrap;
-      gap: 10px;
-    }
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 10px;
+  min-width: 150px; /* novo: garante que apareçam */
+}
+
+
 
     .component {
       width: 140px;
@@ -182,6 +192,15 @@
       padding: 8px;
       border: 1px solid #61dafb;
     }
+
+    #cronometro {
+  text-align: center;
+  font-size: 1.2rem;
+  margin: 10px auto;
+  color: #61dafb;
+  display: block;
+}
+
   </style>
 </head>
 <body>
@@ -221,6 +240,27 @@
   </div>
 
 <script>
+    // 🔧 Configuração do Firebase
+  const firebaseConfig = {
+  apiKey: "AIzaSyBIr2pA8k4yvYiW2ObYckigq6euzXEQyn4",
+  authDomain: "montagem-de-computador.firebaseapp.com",
+  databaseURL: "https://montagem-de-computador-default-rtdb.firebaseio.com",
+  projectId: "montagem-de-computador",
+  storageBucket: "montagem-de-computador.firebasestorage.app",
+  messagingSenderId: "473251306966",
+  appId: "1:473251306966:web:e4c806bd03bb174d1c5877",
+  measurementId: "G-EWVJYEPS57"
+};
+
+   // Isso já está sendo feito na linha abaixo, então essas duas não são necessárias:
+// const app = initializeApp(firebaseConfig);
+// const analytics = getAnalytics(app);
+firebase.initializeApp(firebaseConfig);
+
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
   let tempo = 0, cronometroInterval, erros = 0, colocados = 0;
   let ranking = [];
 
@@ -260,21 +300,22 @@
   }
 
   function montarComponentes() {
-    const nomes = ['Placa-mãe','CPU','Memória RAM','Placa de Vídeo','Armazenamento','Fonte','Cooler'];
-    const container = document.getElementById('componentes');
-    container.innerHTML = '';
-    nomes.sort(() => Math.random() - 0.5).forEach(nome => {
-      const div = document.createElement('div');
-      div.className = 'component';
-      div.textContent = nome;
-      div.setAttribute('draggable', 'true');
-      div.dataset.component = nome;
-      div.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('text/plain', nome);
-      });
-      container.appendChild(div);
+  const nomes = ['Placa-mãe','CPU','Memória RAM','Placa de Vídeo','Armazenamento','Fonte','Cooler'];
+  const container = document.getElementById('componentes');
+  container.innerHTML = '';
+  nomes.sort(() => Math.random() - 0.5).forEach(nome => {
+    const div = document.createElement('div');
+    div.className = 'component';
+    div.textContent = nome;
+    div.setAttribute('draggable', 'true');
+    div.dataset.component = nome;
+    div.addEventListener('dragstart', (e) => {
+      e.dataTransfer.setData('text/plain', nome);
     });
-  }
+    container.appendChild(div);
+  });
+}
+
 
   function configurarSlots() {
     const slots = document.querySelectorAll('.slot');
@@ -319,31 +360,83 @@
   }
 
   function finalizarMontagem() {
-    pararCronometro();
-    alert("🎉 Parabéns! Você finalizou a montagem do computador!");
-    const nome = prompt("Digite seu nome para entrar no ranking:");
-    if (!nome) return;
-    const nota = ((7 - erros) / 7 * 10).toFixed(1);
-    ranking.push({ nome, nota, tempo });
-    ranking.sort((a, b) => b.nota - a.nota || a.tempo - b.tempo);
+  pararCronometro();
+  alert("🎉 Parabéns! Você finalizou a montagem do computador!");
+  const nome = prompt("Digite seu nome para entrar no ranking:");
+  if (!nome) return;
+
+  const nota = ((7 - erros) / 7 * 10).toFixed(1);
+  const jogador = { nome, nota: parseFloat(nota), tempo };
+
+  // Envia para o Firebase
+  const novaEntrada = db.ref('ranking').push();
+  novaEntrada.set(jogador, () => {
+    // Exibir ranking após salvar no Firebase
     exibirRanking();
     document.getElementById('reset-btn').style.display = 'block';
-  }
+  });
+}
+
 
   function exibirRanking() {
-    const div = document.getElementById('ranking');
-    if (!ranking.length) return;
-    let html = '<h2>🏆 Ranking</h2><table><tr><th>Nome</th><th>Nota</th><th>Tempo</th></tr>';
-    ranking.forEach(j => {
+  db.ref('ranking').once('value', snapshot => {
+    const dados = snapshot.val();
+    if (!dados) return;
+
+    const rankingArray = Object.values(dados);
+    rankingArray.sort((a, b) => b.nota - a.nota || a.tempo - b.tempo);
+
+    let html = '<h2>🏆 Ranking</h2><table><tr><th>Nome</th><th>Nota</th><th>Tempo (s)</th></tr>';
+    rankingArray.forEach(j => {
       html += `<tr><td>${j.nome}</td><td>${j.nota}</td><td>${j.tempo}s</td></tr>`;
     });
     html += '</table>';
-    div.innerHTML = html;
-  }
+    document.getElementById('ranking').innerHTML = html;
+  });
+}
 
   function reiniciarJogo() {
     iniciarJogo();
   }
+
+
+  function exibirRanking() {
+    db.ref('ranking').once('value', snapshot => {
+      const dados = snapshot.val();
+      if (!dados) return;
+
+      const rankingArray = Object.values(dados);
+      rankingArray.sort((a, b) => {
+        if (b.nota !== a.nota) return b.nota - a.nota;
+        return a.tempo - b.tempo;
+      });
+
+      let html = `
+        <h2>🏆 Ranking dos Jogadores</h2>
+        <table>
+          <thead>
+            <tr><th>Nome</th><th>Nota</th><th>Tempo (s)</th></tr>
+          </thead>
+          <tbody>
+      `;
+      rankingArray.forEach(j => {
+        html += `<tr><td>${j.nome}</td><td>${j.nota}</td><td>${j.tempo}</td></tr>`;
+      });
+      html += '</tbody></table>';
+      document.getElementById('ranking').innerHTML = html;
+    });
+  }
+
+  function reiniciarJogo() {
+    document.getElementById('jogo').style.display = 'none';
+    document.getElementById('tela-inicial').style.display = 'flex';
+    exibirRanking();
+  }
+
+  // Exibe ranking ao carregar a tela inicial
+  window.onload = exibirRanking;
 </script>
+
+   
 </body>
 </html>

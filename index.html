@@ -2,8 +2,13 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Monte o Computador</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
     body {
       font-family: 'Segoe UI', sans-serif;
       background-color: #0b0c10;
@@ -16,27 +21,28 @@
       text-align: center;
       margin-bottom: 10px;
       color: #61dafb;
-      font-size: 2.5rem;
+      font-size: 2rem;
       text-shadow: 0 0 10px #61dafb;
     }
 
     .container {
       display: flex;
+      flex-wrap: wrap;
       justify-content: center;
       align-items: flex-start;
-      gap: 50px;
+      gap: 20px;
     }
 
     .case {
       position: relative;
-      width: 500px;
-      height: 700px;
+      width: 90vw;
+      max-width: 400px;
+      aspect-ratio: 5 / 7;
       background: #1c1c1c;
       border: 5px solid #555;
       border-radius: 20px;
       box-shadow: 0 0 25px rgba(0, 255, 255, 0.5), inset 0 0 20px #000;
     }
-    
 
     .led-strip {
       position: absolute;
@@ -62,26 +68,30 @@
       align-items: center;
       color: #fff;
       font-weight: bold;
-      font-size: 1.2rem;
+      font-size: 1rem;
+      background-color: rgba(255,255,255,0.05);
     }
 
-    .slot.placa-mae { top: 100px; left: 50px; width: 300px; height: 300px; background-color: rgba(255,255,255,0.05); }
-    .slot.cpu { top: 140px; left: 130px; width: 60px; height: 60px; background-color: rgba(255,255,255,0.05); }
-    .slot.ram { top: 110px; left: 250px; width: 30px; height: 160px; background-color: rgba(255,255,255,0.05); }
-    .slot.gpu { top: 240px; left: 60px; width: 250px; height: 50px; background-color: rgba(255,255,255,0.05); }
-    .slot.ssd { top: 420px; left: 60px; width: 80px; height: 40px; background-color: rgba(255,255,255,0.05); }
-    .slot.fonte { bottom: 20px; left: 50px; width: 200px; height: 60px; background-color: rgba(255,255,255,0.05); }
-    .slot.cooler { top: 100px; left: 10px; width: 40px; height: 40px; background-color: rgba(255,255,255,0.05); }
+    .slot.placa-mae { top: 15%; left: 10%; width: 75%; height: 35%; }
+    .slot.cpu { top: 22%; left: 40%; width: 15%; height: 8%; }
+    .slot.ram { top: 17%; left: 70%; width: 8%; height: 25%; }
+    .slot.gpu { top: 38%; left: 15%; width: 65%; height: 8%; }
+    .slot.ssd { top: 60%; left: 15%; width: 25%; height: 6%; }
+    .slot.fonte { bottom: 5%; left: 10%; width: 60%; height: 8%; }
+    .slot.cooler { top: 15%; left: 2%; width: 10%; height: 7%; }
 
     .components {
       display: flex;
-      flex-direction: column;
+      flex-wrap: wrap;
+      justify-content: center;
       gap: 10px;
+      max-width: 400px;
     }
 
     .component {
-      width: 140px;
-      height: 45px;
+      width: 45%;
+      min-width: 140px;
+      height: 50px;
       background-color: #444;
       border: 2px solid #999;
       border-radius: 8px;
@@ -101,9 +111,9 @@
     .descriptions {
       display: flex;
       flex-direction: column;
-      gap: 15px;
-      font-size: 1rem;
-      max-width: 300px;
+      gap: 10px;
+      font-size: 0.95rem;
+      max-width: 400px;
     }
 
     .description {
@@ -117,28 +127,56 @@
     .description strong {
       color: #61dafb;
     }
+
+    #reset-btn {
+      display: none;
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 1rem;
+      background-color: #61dafb;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      color: #000;
+      font-weight: bold;
+      box-shadow: 0 0 10px #61dafb;
+    }
+
+    #score, #final-message {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #61dafb;
+      margin-top: 10px;
+      text-shadow: 0 0 5px #61dafb;
+    }
+
+    @media (min-width: 768px) {
+      .container {
+        flex-direction: row;
+        gap: 40px;
+      }
+
+      .component {
+        width: 140px;
+      }
+
+      .descriptions {
+        font-size: 1rem;
+      }
+
+      h1 {
+        font-size: 2.5rem;
+      }
+    }
   </style>
 </head>
 <body>
 
 <h1>Monte o Computador</h1>
 
-<button id="reset-btn" onclick="reiniciarJogo()" style="
-  display: none;
-  margin: 20px auto;
-  padding: 10px 20px;
-  font-size: 1rem;
-  background-color: #61dafb;
-  border: none;
-  border-radius: 10px;
-  cursor: pointer;
-  color: #000;
-  font-weight: bold;
-  box-shadow: 0 0 10px #61dafb;
-">
-🔁 Reiniciar Jogo
-</button>
+<button id="reset-btn" onclick="reiniciarJogo()">🔁 Reiniciar Jogo</button>
 
+<div id="score">Erros: 0</div>
 
 <div class="container">
   <div class="case">
@@ -163,7 +201,7 @@
   </div>
 
   <div class="descriptions">
-    <div class="description" data-desc="Placa-mãe"><strong>1.</strong> Placa principal onde os componentes se conectam.</div>
+    <div class="description" data-desc="Placa-mãe"><strong>1.</strong> Peça onde os componentes se conectam.</div>
     <div class="description" data-desc="CPU"><strong>2.</strong> Processa todas as instruções do computador.</div>
     <div class="description" data-desc="Memória RAM"><strong>3.</strong> Responsável por armazenar dados temporários.</div>
     <div class="description" data-desc="Placa de Vídeo"><strong>4.</strong> Responsável pelos gráficos e vídeos em uso.</div>
@@ -181,15 +219,7 @@
   let reiniciarVisivel = false;
   let erros = 0;
 
-  const scoreDisplay = document.createElement('div');
-  scoreDisplay.id = 'score';
-  scoreDisplay.textContent = `Erros: ${erros}`;
-  scoreDisplay.style.textAlign = "center";
-  scoreDisplay.style.margin = "10px";
-  scoreDisplay.style.fontSize = "1.2rem";
-  scoreDisplay.style.color = "#61dafb";
-  scoreDisplay.style.textShadow = "0 0 5px #61dafb";
-  document.body.insertBefore(scoreDisplay, document.querySelector('.container'));
+  const scoreDisplay = document.getElementById('score');
 
   components.forEach(comp => {
     comp.addEventListener('dragstart', (e) => {
@@ -205,47 +235,38 @@
       const data = e.dataTransfer.getData('text/plain');
       const expected = slot.dataset.accept;
 
-      if (data === expected) {
-        if (!slot.querySelector('.component')) {
-          const placed = document.createElement('div');
-          placed.textContent = data;
-          placed.className = 'component';
-          placed.style.pointerEvents = 'none';
-          placed.style.position = 'absolute';
-          placed.style.top = 0;
-          placed.style.left = 0;
-          placed.style.width = '100%';
-          placed.style.height = '100%';
-          placed.style.fontSize = '12px';
-          slot.innerHTML = slot.textContent.match(/\d+/)?.[0] || '';
-          slot.appendChild(placed);
+      if (data === expected && !slot.querySelector('.component')) {
+        const placed = document.createElement('div');
+        placed.textContent = data;
+        placed.className = 'component';
+        placed.style.pointerEvents = 'none';
+        placed.style.position = 'absolute';
+        placed.style.top = 0;
+        placed.style.left = 0;
+        placed.style.width = '100%';
+        placed.style.height = '100%';
+        placed.style.fontSize = '12px';
+        slot.innerHTML = slot.textContent.match(/\d+/)?.[0] || '';
+        slot.appendChild(placed);
 
-          const compElement = [...components].find(c => c.dataset.component === data);
-          if (compElement) compElement.style.opacity = '0.3';
+        const compElement = [...components].find(c => c.dataset.component === data);
+        if (compElement) compElement.style.opacity = '0.3';
 
-          if (descriptions[index]) {
-            descriptions[index].style.display = 'none';
-          }
+        if (descriptions[index]) descriptions[index].style.display = 'none';
 
-          placedComponents++;
+        placedComponents++;
 
-          if (!reiniciarVisivel) {
-            document.getElementById('reset-btn').style.display = 'block';
-            reiniciarVisivel = true;
-          }
+        if (!reiniciarVisivel) {
+          document.getElementById('reset-btn').style.display = 'block';
+          reiniciarVisivel = true;
+        }
 
-          if (placedComponents === 7) {
-            const notaFinal = ((7 - erros) / 7 * 10).toFixed(1);
-            const msg = document.createElement('div');
-            msg.id = 'final-message';
-            msg.textContent = `🎉 Montagem Completa! Sua nota: ${notaFinal}`;
-            msg.style.textAlign = "center";
-            msg.style.marginTop = "20px";
-            msg.style.color = "#61dafb";
-            msg.style.fontSize = "1.5rem";
-            msg.style.textShadow = "0 0 10px #61dafb";
-            document.body.appendChild(msg);
-          }
+        if (placedComponents === 7) {
+          const notaFinal = ((7 - erros) / 7 * 10).toFixed(1);
+          const msg = document.createElement('div');
+          msg.id = 'final-message';
+          msg.textContent = `🎉 Montagem Completa! Sua nota: ${notaFinal}`;
+          document.body.appendChild(msg);
         }
       } else {
         erros++;
@@ -280,12 +301,6 @@
     if (msg) msg.remove();
   }
 </script>
-
-
-
-
-
-
 
 </body>
 </html>

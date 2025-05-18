@@ -1,47 +1,57 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
   <title>Monte o Computador</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
-    * {
-      box-sizing: border-box;
-    }
-
     body {
       font-family: 'Segoe UI', sans-serif;
       background-color: #0b0c10;
       color: #eee;
       margin: 0;
-      padding: 20px;
+      padding: 0;
     }
 
     h1 {
       text-align: center;
-      margin-bottom: 10px;
       color: #61dafb;
-      font-size: 2rem;
-      text-shadow: 0 0 10px #61dafb;
+      font-size: 2.2rem;
+      margin-top: 20px;
+    }
+
+    .tela-inicial {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .tela-inicial p {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
     }
 
     .container {
       display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 20px;
+      flex-direction: row;
+      align-items: center;
+      padding: 20px;
+      gap: 30px;
     }
 
     .case {
       position: relative;
       width: 90vw;
       max-width: 400px;
-      aspect-ratio: 5 / 7;
+      height: 500px;
       background: #1c1c1c;
-      border: 5px solid #555;
+      border: 4px solid #555;
       border-radius: 20px;
-      box-shadow: 0 0 25px rgba(0, 255, 255, 0.5), inset 0 0 20px #000;
+      box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
     }
 
     .led-strip {
@@ -68,30 +78,26 @@
       align-items: center;
       color: #fff;
       font-weight: bold;
-      font-size: 1rem;
-      background-color: rgba(255,255,255,0.05);
+      font-size: 0.9rem;
     }
 
-    .slot.placa-mae { top: 15%; left: 10%; width: 75%; height: 35%; }
-    .slot.cpu { top: 22%; left: 40%; width: 15%; height: 8%; }
-    .slot.ram { top: 17%; left: 70%; width: 8%; height: 25%; }
-    .slot.gpu { top: 38%; left: 15%; width: 65%; height: 8%; }
-    .slot.ssd { top: 60%; left: 15%; width: 25%; height: 6%; }
-    .slot.fonte { bottom: 5%; left: 10%; width: 60%; height: 8%; }
-    .slot.cooler { top: 15%; left: 2%; width: 10%; height: 7%; }
+    .slot.placa-mae { top: 70px; left: 30px; width: 250px; height: 200px; background-color: rgba(255,255,255,0.05); }
+    .slot.cpu { top: 90px; left: 110px; width: 50px; height: 50px; background-color: rgba(255,255,255,0.05); }
+    .slot.ram { top: 80px; left: 190px; width: 20px; height: 120px; background-color: rgba(255,255,255,0.05); }
+    .slot.gpu { top: 180px; left: 40px; width: 200px; height: 40px; background-color: rgba(255,255,255,0.05); }
+    .slot.ssd { top: 300px; left: 40px; width: 60px; height: 30px; background-color: rgba(255,255,255,0.05); }
+    .slot.fonte { bottom: 15px; left: 30px; width: 160px; height: 50px; background-color: rgba(255,255,255,0.05); }
+    .slot.cooler { top: 70px; left: 10px; width: 30px; height: 30px; background-color: rgba(255,255,255,0.05); }
 
     .components {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
       gap: 10px;
-      max-width: 400px;
     }
 
     .component {
-      width: 45%;
-      min-width: 140px;
-      height: 50px;
+      width: 140px;
       background-color: #444;
       border: 2px solid #999;
       border-radius: 8px;
@@ -102,6 +108,8 @@
       user-select: none;
       font-weight: bold;
       font-size: 1rem;
+      padding: 8px;
+      color: #fff;
     }
 
     .component:active {
@@ -112,8 +120,8 @@
       display: flex;
       flex-direction: column;
       gap: 10px;
-      font-size: 0.95rem;
-      max-width: 400px;
+      max-width: 320px;
+      padding: 0 10px;
     }
 
     .description {
@@ -122,15 +130,14 @@
       padding: 10px;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0, 255, 255, 0.3);
+      font-size: 0.9rem;
     }
 
     .description strong {
       color: #61dafb;
     }
 
-    #reset-btn {
-      display: none;
-      margin: 20px auto;
+    #reset-btn, #start-btn {
       padding: 10px 20px;
       font-size: 1rem;
       background-color: #61dafb;
@@ -140,167 +147,191 @@
       color: #000;
       font-weight: bold;
       box-shadow: 0 0 10px #61dafb;
+      margin: 20px auto;
+      display: block;
     }
 
-    #score, #final-message {
+    #ranking {
       text-align: center;
-      font-size: 1.2rem;
-      color: #61dafb;
-      margin-top: 10px;
-      text-shadow: 0 0 5px #61dafb;
+      margin-top: 20px;
+      padding: 10px;
     }
 
-    @media (min-width: 768px) {
-      .container {
-        flex-direction: row;
-        gap: 40px;
-      }
+    #ranking table {
+      width: 90%;
+      max-width: 500px;
+      margin: 0 auto;
+      border-collapse: collapse;
+      background: #111;
+      color: #61dafb;
+    }
 
-      .component {
-        width: 140px;
-      }
-
-      .descriptions {
-        font-size: 1rem;
-      }
-
-      h1 {
-        font-size: 2.5rem;
-      }
+    #ranking th, #ranking td {
+      padding: 8px;
+      border: 1px solid #61dafb;
     }
   </style>
 </head>
 <body>
-
-<h1>Monte o Computador</h1>
-
-<button id="reset-btn" onclick="reiniciarJogo()">🔁 Reiniciar Jogo</button>
-
-<div id="score">Erros: 0</div>
-
-<div class="container">
-  <div class="case">
-    <div class="led-strip"></div>
-    <div class="slot placa-mae" data-accept="Placa-mãe">1</div>
-    <div class="slot cpu" data-accept="CPU">2</div>
-    <div class="slot ram" data-accept="Memória RAM">3</div>
-    <div class="slot gpu" data-accept="Placa de Vídeo">4</div>
-    <div class="slot ssd" data-accept="Armazenamento">5</div>
-    <div class="slot fonte" data-accept="Fonte">6</div>
-    <div class="slot cooler" data-accept="Cooler">7</div>
+  <div class="tela-inicial" id="tela-inicial">
+    <h1>Monte o Computador</h1>
+    <p>Arraste e solte os componentes no gabinete para montar seu computador corretamente. Ganhe nota e seja mais rápido para liderar o ranking!</p>
+    <button id="start-btn" onclick="iniciarJogo()">🚀 Iniciar Jogo</button>
   </div>
 
-  <div class="components">
-    <div class="component" draggable="true" data-component="Armazenamento">Armazenamento</div>
-    <div class="component" draggable="true" data-component="Placa de Vídeo">Placa de Vídeo</div>
-    <div class="component" draggable="true" data-component="Placa-mãe">Placa-mãe</div>
-    <div class="component" draggable="true" data-component="Cooler">Cooler</div>
-    <div class="component" draggable="true" data-component="Fonte">Fonte</div>
-    <div class="component" draggable="true" data-component="Memória RAM">Memória RAM</div>
-    <div class="component" draggable="true" data-component="CPU">CPU</div>
+  <div id="jogo" style="display:none">
+    <h1>Monte o Computador</h1>
+    <div id="cronometro" style="text-align:center; font-size:1.2rem; margin: 10px; color:#61dafb;"></div>
+    <div class="container">
+      <div class="case">
+        <div class="led-strip"></div>
+        <div class="slot placa-mae" data-accept="Placa-mãe">1</div>
+        <div class="slot cpu" data-accept="CPU">2</div>
+        <div class="slot ram" data-accept="Memória RAM">3</div>
+        <div class="slot gpu" data-accept="Placa de Vídeo">4</div>
+        <div class="slot ssd" data-accept="Armazenamento">5</div>
+        <div class="slot fonte" data-accept="Fonte">6</div>
+        <div class="slot cooler" data-accept="Cooler">7</div>
+      </div>
+      <div class="components" id="componentes"></div>
+      <div class="descriptions" id="descriptions">
+        <div class="description" data-desc="Placa-mãe"><strong>1.</strong> Peça onde os componentes se conectam</div>
+        <div class="description" data-desc="CPU"><strong>2.</strong> Processa todas as instruções do computador.</div>
+        <div class="description" data-desc="Memória RAM"><strong>3.</strong> Responsável por armazenar dados temporários.</div>
+        <div class="description" data-desc="Placa de Vídeo"><strong>4.</strong> Responsável pelos gráficos e vídeos em uso.</div>
+        <div class="description" data-desc="Armazenamento"><strong>5.</strong> Guarda os arquivos e programas do sistema.</div>
+        <div class="description" data-desc="Fonte"><strong>6.</strong> Fornece energia para os componentes do computador.</div>
+        <div class="description" data-desc="Cooler"><strong>7.</strong> Resfria o processador e evita superaquecimento.</div>
+      </div>
+    </div>
+    <button id="reset-btn" onclick="reiniciarJogo()" style="display:none">🔁 Reiniciar</button>
+    <div id="ranking"></div>
   </div>
-
-  <div class="descriptions">
-    <div class="description" data-desc="Placa-mãe"><strong>1.</strong> Peça onde os componentes se conectam.</div>
-    <div class="description" data-desc="CPU"><strong>2.</strong> Processa todas as instruções do computador.</div>
-    <div class="description" data-desc="Memória RAM"><strong>3.</strong> Responsável por armazenar dados temporários.</div>
-    <div class="description" data-desc="Placa de Vídeo"><strong>4.</strong> Responsável pelos gráficos e vídeos em uso.</div>
-    <div class="description" data-desc="Armazenamento"><strong>5.</strong> Guarda os arquivos e programas do sistema.</div>
-    <div class="description" data-desc="Fonte"><strong>6.</strong> Fornece energia para os componentes do computador.</div>
-    <div class="description" data-desc="Cooler"><strong>7.</strong> Resfria o processador e evita superaquecimento.</div>
-  </div>
-</div>
 
 <script>
-  const components = document.querySelectorAll('.component');
-  const slots = document.querySelectorAll('.slot');
-  const descriptions = document.querySelectorAll('.descriptions .description');
-  let placedComponents = 0;
-  let reiniciarVisivel = false;
-  let erros = 0;
+  let tempo = 0, cronometroInterval, erros = 0, colocados = 0;
+  let ranking = [];
 
-  const scoreDisplay = document.getElementById('score');
+  function iniciarJogo() {
+    document.getElementById('tela-inicial').style.display = 'none';
+    document.getElementById('jogo').style.display = 'block';
+    document.getElementById('ranking').innerHTML = '';
+    document.getElementById('reset-btn').style.display = 'none';
+    tempo = 0;
+    erros = 0;
+    colocados = 0;
 
-  components.forEach(comp => {
-    comp.addEventListener('dragstart', (e) => {
-      e.dataTransfer.setData('text/plain', comp.dataset.component);
+    iniciarCronometro();
+    montarComponentes();
+    resetarSlots();
+    configurarSlots();
+
+    document.querySelectorAll('.description').forEach(desc => desc.style.display = 'block');
+  }
+
+  function resetarSlots() {
+    document.querySelectorAll('.slot').forEach(slot => {
+      slot.innerHTML = slot.textContent.match(/\d+/)?.[0] || '';
     });
-  });
+  }
 
-  slots.forEach((slot, index) => {
-    slot.addEventListener('dragover', (e) => e.preventDefault());
+  function iniciarCronometro() {
+    document.getElementById('cronometro').textContent = `⏱️ Tempo: 0s`;
+    cronometroInterval = setInterval(() => {
+      tempo++;
+      document.getElementById('cronometro').textContent = `⏱️ Tempo: ${tempo}s`;
+    }, 1000);
+  }
 
-    slot.addEventListener('drop', (e) => {
-      e.preventDefault();
-      const data = e.dataTransfer.getData('text/plain');
-      const expected = slot.dataset.accept;
+  function pararCronometro() {
+    clearInterval(cronometroInterval);
+  }
 
-      if (data === expected && !slot.querySelector('.component')) {
-        const placed = document.createElement('div');
-        placed.textContent = data;
-        placed.className = 'component';
-        placed.style.pointerEvents = 'none';
-        placed.style.position = 'absolute';
-        placed.style.top = 0;
-        placed.style.left = 0;
-        placed.style.width = '100%';
-        placed.style.height = '100%';
-        placed.style.fontSize = '12px';
-        slot.innerHTML = slot.textContent.match(/\d+/)?.[0] || '';
-        slot.appendChild(placed);
-
-        const compElement = [...components].find(c => c.dataset.component === data);
-        if (compElement) compElement.style.opacity = '0.3';
-
-        if (descriptions[index]) descriptions[index].style.display = 'none';
-
-        placedComponents++;
-
-        if (!reiniciarVisivel) {
-          document.getElementById('reset-btn').style.display = 'block';
-          reiniciarVisivel = true;
-        }
-
-        if (placedComponents === 7) {
-          const notaFinal = ((7 - erros) / 7 * 10).toFixed(1);
-          const msg = document.createElement('div');
-          msg.id = 'final-message';
-          msg.textContent = `🎉 Montagem Completa! Sua nota: ${notaFinal}`;
-          document.body.appendChild(msg);
-        }
-      } else {
-        erros++;
-        alert(`❌ Componente incorreto! Você errou ${erros} vez(es).`);
-        scoreDisplay.textContent = `Erros: ${erros}`;
-      }
+  function montarComponentes() {
+    const nomes = ['Placa-mãe','CPU','Memória RAM','Placa de Vídeo','Armazenamento','Fonte','Cooler'];
+    const container = document.getElementById('componentes');
+    container.innerHTML = '';
+    nomes.sort(() => Math.random() - 0.5).forEach(nome => {
+      const div = document.createElement('div');
+      div.className = 'component';
+      div.textContent = nome;
+      div.setAttribute('draggable', 'true');
+      div.dataset.component = nome;
+      div.addEventListener('dragstart', (e) => {
+        e.dataTransfer.setData('text/plain', nome);
+      });
+      container.appendChild(div);
     });
-  });
+  }
+
+  function configurarSlots() {
+    const slots = document.querySelectorAll('.slot');
+    const descriptions = document.querySelectorAll('.description');
+    slots.forEach(slot => {
+      slot.ondragover = e => e.preventDefault();
+      slot.ondrop = e => {
+        e.preventDefault();
+        const data = e.dataTransfer.getData('text/plain');
+        const expected = slot.dataset.accept;
+
+        if (!slot.querySelector('.component')) {
+          if (data === expected) {
+            const placed = document.createElement('div');
+            placed.textContent = data;
+            placed.className = 'component';
+            placed.style.pointerEvents = 'none';
+            placed.style.position = 'absolute';
+            placed.style.top = 0;
+            placed.style.left = 0;
+            placed.style.width = '100%';
+            placed.style.height = '100%';
+            placed.style.fontSize = '12px';
+            slot.innerHTML = slot.textContent.match(/\d+/)?.[0] || '';
+            slot.appendChild(placed);
+
+            const compElement = document.querySelector(`.component[data-component="${data}"]`);
+            if (compElement) compElement.remove();
+
+            const desc = [...descriptions].find(d => d.dataset.desc === data);
+            if (desc) desc.style.display = 'none';
+
+            colocados++;
+            if (colocados === 7) finalizarMontagem();
+          } else {
+            erros++;
+            alert(`❌ Componente incorreto! Você errou ${erros} vez(es).`);
+          }
+        }
+      };
+    });
+  }
+
+  function finalizarMontagem() {
+    pararCronometro();
+    alert("🎉 Parabéns! Você finalizou a montagem do computador!");
+    const nome = prompt("Digite seu nome para entrar no ranking:");
+    if (!nome) return;
+    const nota = ((7 - erros) / 7 * 10).toFixed(1);
+    ranking.push({ nome, nota, tempo });
+    ranking.sort((a, b) => b.nota - a.nota || a.tempo - b.tempo);
+    exibirRanking();
+    document.getElementById('reset-btn').style.display = 'block';
+  }
+
+  function exibirRanking() {
+    const div = document.getElementById('ranking');
+    if (!ranking.length) return;
+    let html = '<h2>🏆 Ranking</h2><table><tr><th>Nome</th><th>Nota</th><th>Tempo</th></tr>';
+    ranking.forEach(j => {
+      html += `<tr><td>${j.nome}</td><td>${j.nota}</td><td>${j.tempo}s</td></tr>`;
+    });
+    html += '</table>';
+    div.innerHTML = html;
+  }
 
   function reiniciarJogo() {
-    placedComponents = 0;
-    erros = 0;
-    reiniciarVisivel = false;
-    document.getElementById('reset-btn').style.display = 'none';
-    scoreDisplay.textContent = `Erros: ${erros}`;
-
-    slots.forEach(slot => {
-      const num = slot.textContent.match(/\d+/)?.[0] || '';
-      slot.innerHTML = num;
-    });
-
-    components.forEach(comp => {
-      comp.style.opacity = '1';
-      comp.setAttribute('draggable', 'true');
-    });
-
-    descriptions.forEach(desc => {
-      desc.style.display = 'block';
-    });
-
-    const msg = document.getElementById('final-message');
-    if (msg) msg.remove();
+    iniciarJogo();
   }
 </script>
-
 </body>
 </html>

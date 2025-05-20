@@ -239,7 +239,23 @@
     <div id="ranking"></div>
   </div>
 
+
 <script>
+
+    function apagarRankingFirebase() {
+  const db = firebase.database();
+  db.ref("ranking").remove()
+    .then(() => {
+      alert("Ranking apagado com sucesso!");
+      // opcional: remover botão após uso
+      document.getElementById("botaoApagarRanking").remove();
+    })
+    .catch((error) => {
+      console.error("Erro ao apagar ranking:", error);
+    });
+}
+
+
     // 🔧 Configuração do Firebase
   const firebaseConfig = {
   apiKey: "AIzaSyBIr2pA8k4yvYiW2ObYckigq6euzXEQyn4",
@@ -300,7 +316,7 @@ firebase.initializeApp(firebaseConfig);
   }
 
   function montarComponentes() {
-  const nomes = ['Placa-mãe','CPU','Memória RAM','Placa de Vídeo','Armazenamento','Fonte','Cooler'];
+  const nomes = ['Fonte','Memória RAM','Placa-mãe','Placa de Vídeo','Cooler','CPU','Armazenamento'];
   const container = document.getElementById('componentes');
   container.innerHTML = '';
   nomes.sort(() => Math.random() - 0.5).forEach(nome => {
@@ -314,6 +330,7 @@ firebase.initializeApp(firebaseConfig);
     });
     container.appendChild(div);
   });
+  console.log("Componentes adicionados:", container.children.length); // debug
 }
 
 
@@ -437,6 +454,5 @@ firebase.initializeApp(firebaseConfig);
   window.onload = exibirRanking;
 </script>
 
-   
 </body>
 </html>

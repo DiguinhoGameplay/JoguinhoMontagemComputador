@@ -109,12 +109,12 @@
     .slot.cooler { top: 70px; left: 30px; width: 30px; height: 30px; background-color: rgba(255,255,255,0.05); }
 
     .components {
-  display: flex;
-  flex-direction: column;
-  flex-wrap: nowrap;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
   gap: 10px;
-  min-width: 150px; /* novo: garante que apareçam */
+  max-width: 300px; 
 }
+
 
 
 
@@ -237,23 +237,25 @@
     </div>
     <button id="reset-btn" onclick="reiniciarJogo()" style="display:none">🔁 Reiniciar</button>
     <div id="ranking"></div>
+    <!-- <button id="botaoApagarRanking" onclick="apagarRankingFirebase()">🗑️ Apagar Ranking</button> -->
+
   </div>
 
 
 <script>
 
-    function apagarRankingFirebase() {
-  const db = firebase.database();
-  db.ref("ranking").remove()
-    .then(() => {
-      alert("Ranking apagado com sucesso!");
-      // opcional: remover botão após uso
-      document.getElementById("botaoApagarRanking").remove();
-    })
-    .catch((error) => {
-      console.error("Erro ao apagar ranking:", error);
-    });
-}
+//     function apagarRankingFirebase() {
+//   const db = firebase.database();
+//   db.ref("ranking").remove()
+//     .then(() => {
+//       alert("Ranking apagado com sucesso!");
+//       // opcional: remover botão após uso
+//       document.getElementById("botaoApagarRanking").remove();
+//     })
+//     .catch((error) => {
+//       console.error("Erro ao apagar ranking:", error);
+//     });
+// }
 
 
     // 🔧 Configuração do Firebase
@@ -411,10 +413,6 @@ firebase.initializeApp(firebaseConfig);
     document.getElementById('ranking').innerHTML = html;
   });
 }
-
-  function reiniciarJogo() {
-    iniciarJogo();
-  }
 
 
   function exibirRanking() {
